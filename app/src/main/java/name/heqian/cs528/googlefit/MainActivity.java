@@ -76,7 +76,7 @@ public class MainActivity extends FragmentActivity
             e.printStackTrace();
         }
         mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
-                500, 20, this);
+                500, 30, this);
     }
 
     @Override
