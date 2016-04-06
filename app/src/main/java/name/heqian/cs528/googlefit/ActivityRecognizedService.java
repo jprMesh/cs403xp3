@@ -17,6 +17,7 @@ import java.util.List;
 public class ActivityRecognizedService extends IntentService {
 
     private int highestConfidence;
+    private int ourActivity;
     public ActivityRecognizedService() {
         super("ActivityRecognizedService");
     }
@@ -43,7 +44,7 @@ public class ActivityRecognizedService extends IntentService {
                 case DetectedActivity.IN_VEHICLE: {
                     Log.e( "ActivityRecogition", "In Vehicle: " + activity.getConfidence() );
                     if (activity.getConfidence() > highestConfidence) {
-                        activityIntent.putExtra("ACTION", "You are in a vehicle");
+                        ourActivity = 0;
                         highestConfidence = activity.getConfidence();
                     }
                     break;
@@ -51,7 +52,7 @@ public class ActivityRecognizedService extends IntentService {
                 case DetectedActivity.RUNNING: {
                     Log.e( "ActivityRecogition", "Running: " + activity.getConfidence() );
                     if (activity.getConfidence() > highestConfidence) {
-                        activityIntent.putExtra("ACTION", "You are running");
+                        ourActivity = 1;
                         highestConfidence = activity.getConfidence();
                     }
                     break;
@@ -59,7 +60,7 @@ public class ActivityRecognizedService extends IntentService {
                 case DetectedActivity.STILL: {
                     Log.e( "ActivityRecogition", "Still: " + activity.getConfidence() );
                     if (activity.getConfidence() > highestConfidence) {
-                        activityIntent.putExtra("ACTION", "You are still");
+                        ourActivity = 2;
                         highestConfidence = activity.getConfidence();
                     }
                     break;
@@ -74,7 +75,7 @@ public class ActivityRecognizedService extends IntentService {
                         NotificationManagerCompat.from(this).notify(0, builder.build());
                     }*/
                     if (activity.getConfidence() > highestConfidence) {
-                        activityIntent.putExtra("ACTION", "You are walking");
+                        ourActivity = 3;
                         highestConfidence = activity.getConfidence();
                     }
                     break;
@@ -84,6 +85,17 @@ public class ActivityRecognizedService extends IntentService {
                     break;
                 }
             }
+        }
+        if (ourActivity == 0) {
+            activityIntent.putExtra("ACTION", "You are in a vehicle");
+        } else if (ourActivity == 1) {
+            activityIntent.putExtra("ACTION", "You are running");
+        } else if (ourActivity == 2) {
+            activityIntent.putExtra("ACTION", "You are still");
+        } else if (ourActivity == 3) {
+            activityIntent.putExtra("ACTION", "You are walking");
+        } else {
+            activityIntent.putExtra("ACTION", "Initializing...");
         }
         sendBroadcast(activityIntent);
     }

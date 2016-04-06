@@ -19,6 +19,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.content.IntentFilter;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.util.Log;
 import android.widget.Toast;
@@ -44,9 +45,12 @@ public class MainActivity extends FragmentActivity
     private ResponseReceiver mReceiver;
 
     public TextView ourText;
+    public ImageView ourImage;
     public GoogleMap mMap;
     public Location mLastLocation;
     public LocationManager mLocationManager;
+    public String currentActivity;
+    public long startOfCurrentActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +68,9 @@ public class MainActivity extends FragmentActivity
 
         ourText = (TextView) findViewById(R.id.textView);
         ourText.setText("Initializing...");
+        ourImage = (ImageView) findViewById(R.id.imageView);
+        currentActivity = "still";
+        startOfCurrentActivity = System.currentTimeMillis()/1000;
 
         MapFragment mapFragment = (MapFragment) getFragmentManager()
                 .findFragmentById(R.id.map);
@@ -112,7 +119,50 @@ public class MainActivity extends FragmentActivity
         public static final String ACTION_RESP = "name.heqian.cs528.googlefit.intent.action.MESSAGE_PROCESSED";
         @Override
         public void onReceive(Context context, Intent intent) {
-            ourText.setText(intent.getStringExtra("ACTION"));
+            String action = intent.getStringExtra("ACTION");
+            ourText.setText(action);
+            switch (action) {
+                case "You are in a vehicle":
+                    ourImage.setImageResource(R.drawable.in_vehicle);
+                    if (currentActivity != "in a vehicle") {
+                        long timeDid = System.currentTimeMillis()/1000-startOfCurrentActivity;
+                        Toast.makeText(getApplicationContext(), "You were "+currentActivity+" for "+timeDid+" seconds.", Toast.LENGTH_SHORT).show();
+                        startOfCurrentActivity = System.currentTimeMillis()/1000;
+                    }
+                    currentActivity = "in a vehicle";
+                    break;
+                case "You are walking":
+                    ourImage.setImageResource(R.drawable.walking);
+                    if (currentActivity != "walking") {
+                        long timeDid = System.currentTimeMillis()/1000-startOfCurrentActivity;
+                        Toast.makeText(getApplicationContext(), "You were "+currentActivity+" for "+timeDid+" seconds.", Toast.LENGTH_SHORT).show();
+                        startOfCurrentActivity = System.currentTimeMillis()/1000;
+                    }
+                    currentActivity = "walking";
+                    break;
+                case "You are still":
+                    ourImage.setImageResource(R.drawable.still);
+                    if (currentActivity != "still") {
+                        long timeDid = System.currentTimeMillis()/1000-startOfCurrentActivity;
+                        Toast.makeText(getApplicationContext(), "You were "+currentActivity+" for "+timeDid+" seconds.", Toast.LENGTH_SHORT).show();
+                        startOfCurrentActivity = System.currentTimeMillis()/1000;
+                    }
+                    currentActivity = "still";
+                    break;
+                case "You are running":
+                    ourImage.setImageResource(R.drawable.running);
+                    if (currentActivity != "running") {
+                        long timeDid = System.currentTimeMillis()/1000-startOfCurrentActivity;
+                        Toast.makeText(getApplicationContext(), "You were "+currentActivity+" for "+timeDid+" seconds.", Toast.LENGTH_SHORT).show();
+                        startOfCurrentActivity = System.currentTimeMillis()/1000;
+                    }
+                    currentActivity = "running";
+                    break;
+                default:
+                    ourImage.setImageResource(R.drawable.still);
+                    currentActivity = "still";
+                    break;
+            }
         }
     }
 
