@@ -1,12 +1,16 @@
 package name.heqian.cs528.googlefit;
 
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.content.IntentFilter;
+import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -22,11 +26,19 @@ import com.google.android.gms.wallet.wobs.TimeInterval;
 public class MainActivity extends FragmentActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, OnMapReadyCallback {
 
     public GoogleApiClient mApiClient;
+    private ResponseReceiver receiver;
+
+    TextView ourText =(TextView)findViewById(R.id.textView);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        IntentFilter filter = new IntentFilter(ResponseReceiver.ACTION_RESP);
+        filter.addCategory(Intent.CATEGORY_DEFAULT);
+        receiver = new ResponseReceiver();
+        registerReceiver(receiver, filter);
 
         mApiClient = new GoogleApiClient.Builder(this)
                 .addApi(ActivityRecognition.API)
@@ -35,6 +47,8 @@ public class MainActivity extends FragmentActivity implements GoogleApiClient.Co
                 .build();
 
         mApiClient.connect();
+
+        ourText.setText("Initializing...");
 
         MapFragment mapFragment = (MapFragment) getFragmentManager()
                 .findFragmentById(R.id.map);
@@ -51,6 +65,13 @@ public class MainActivity extends FragmentActivity implements GoogleApiClient.Co
     @Override
     public void onConnectionSuspended(int i) {
 
+    }
+    public class ResponseReceiver extends BroadcastReceiver {
+        public static final String ACTION_RESP = "name.heqian.cs528.googlefit.intent.action.MESSAGE_PROCESSED";
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            ourText.setText(intent.getStringExtra("ACTION"));
+        }
     }
 
     @Override
