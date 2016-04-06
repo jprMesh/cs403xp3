@@ -16,7 +16,7 @@ import java.util.List;
  */
 public class ActivityRecognizedService extends IntentService {
 
-
+    private int highestConfidence;
     public ActivityRecognizedService() {
         super("ActivityRecognizedService");
     }
@@ -34,38 +34,33 @@ public class ActivityRecognizedService extends IntentService {
     }
 
     private void handleDetectedActivities(List<DetectedActivity> probableActivities) {
+        highestConfidence = 0;
+        Intent activityIntent = new Intent();
+        activityIntent.setAction(MainActivity.ResponseReceiver.ACTION_RESP);
+        activityIntent.addCategory(Intent.CATEGORY_DEFAULT);
         for( DetectedActivity activity : probableActivities ) {
             switch( activity.getType() ) {
                 case DetectedActivity.IN_VEHICLE: {
                     Log.e( "ActivityRecogition", "In Vehicle: " + activity.getConfidence() );
-                    if (activity.getConfidence() > 75) {
-                        Intent activityIntent = new Intent();
-                        activityIntent.setAction(MainActivity.ResponseReceiver.ACTION_RESP);
-                        activityIntent.addCategory(Intent.CATEGORY_DEFAULT);
+                    if (activity.getConfidence() > highestConfidence) {
                         activityIntent.putExtra("ACTION", "You are in a vehicle");
-                        sendBroadcast(activityIntent);
+                        highestConfidence = activity.getConfidence();
                     }
                     break;
                 }
                 case DetectedActivity.RUNNING: {
                     Log.e( "ActivityRecogition", "Running: " + activity.getConfidence() );
-                    if (activity.getConfidence() > 75) {
-                        Intent activityIntent = new Intent();
-                        activityIntent.setAction(MainActivity.ResponseReceiver.ACTION_RESP);
-                        activityIntent.addCategory(Intent.CATEGORY_DEFAULT);
+                    if (activity.getConfidence() > highestConfidence) {
                         activityIntent.putExtra("ACTION", "You are running");
-                        sendBroadcast(activityIntent);
+                        highestConfidence = activity.getConfidence();
                     }
                     break;
                 }
                 case DetectedActivity.STILL: {
                     Log.e( "ActivityRecogition", "Still: " + activity.getConfidence() );
-                    if (activity.getConfidence() > 75) {
-                        Intent activityIntent = new Intent();
-                        activityIntent.setAction(MainActivity.ResponseReceiver.ACTION_RESP);
-                        activityIntent.addCategory(Intent.CATEGORY_DEFAULT);
+                    if (activity.getConfidence() > highestConfidence) {
                         activityIntent.putExtra("ACTION", "You are still");
-                        sendBroadcast(activityIntent);
+                        highestConfidence = activity.getConfidence();
                     }
                     break;
                 }
@@ -78,12 +73,9 @@ public class ActivityRecognizedService extends IntentService {
                         builder.setContentTitle( getString( R.string.app_name ) );
                         NotificationManagerCompat.from(this).notify(0, builder.build());
                     }*/
-                    if (activity.getConfidence() > 75) {
-                        Intent activityIntent = new Intent();
-                        activityIntent.setAction(MainActivity.ResponseReceiver.ACTION_RESP);
-                        activityIntent.addCategory(Intent.CATEGORY_DEFAULT);
+                    if (activity.getConfidence() > highestConfidence) {
                         activityIntent.putExtra("ACTION", "You are walking");
-                        sendBroadcast(activityIntent);
+                        highestConfidence = activity.getConfidence();
                     }
                     break;
                 }
@@ -93,5 +85,6 @@ public class ActivityRecognizedService extends IntentService {
                 }
             }
         }
+        sendBroadcast(activityIntent);
     }
 }
